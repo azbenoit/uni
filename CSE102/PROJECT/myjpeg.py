@@ -525,10 +525,136 @@ def time_it(f,rep, *args, **kwargs):
     # return f'[f] took {(time.time()-t)*1000} milliseconds'  
     return sum(tot)/rep
 
+def quantization(A,Q):
+    for i in range(8):
+        for j in range(8):
+            A[i][j] = round(A[i][j]/Q[i][j])
+    return A
+
+def quantizationI(A,Q):
+    for i in range(8):
+        for j in range(8):
+            A[i][j] = A[i][j]*Q[i][j]
+    return A
 
 
 
 
+def Qmatrix(isY, phi):
+    S = round(5000/phi)
+    if phi >= 50:
+        S = 200 - 2*phi
+    
+    
+    LQM = [
+      [16, 11, 10, 16,  24,  40,  51,  61],
+      [12, 12, 14, 19,  26,  58,  60,  55],
+      [14, 13, 16, 24,  40,  57,  69,  56],
+      [14, 17, 22, 29,  51,  87,  80,  62],
+      [18, 22, 37, 56,  68, 109, 103,  77],
+      [24, 35, 55, 64,  81, 104, 113,  92],
+      [49, 64, 78, 87, 103, 121, 120, 101],
+      [72, 92, 95, 98, 112, 100, 103,  99],
+    ]
+    
+    CQM = [
+      [17, 18, 24, 47, 99, 99, 99, 99],
+      [18, 21, 26, 66, 99, 99, 99, 99],
+      [24, 26, 56, 99, 99, 99, 99, 99],
+      [47, 66, 99, 99, 99, 99, 99, 99],
+      [99, 99, 99, 99, 99, 99, 99, 99],
+      [99, 99, 99, 99, 99, 99, 99, 99],
+      [99, 99, 99, 99, 99, 99, 99, 99],
+      [99, 99, 99, 99, 99, 99, 99, 99],
+    ]
+    
+    if isY:
+        for i in range(8):
+            for j in range(8):
+                LQM[i][j] = math.ceil((50+S*LQM[i][j])/100)
+        return LQM
+    else:
+        for i in range(8):
+            for j in range(8):
+                CQM[i][j] = math.ceil((50+S*CQM[i][j])/100)
+        return CQM
+    
+def zigzag(A):
+    row = 0
+    col = 0
+    forwards = True
+    down = True 
+    h = len(A)
+    w = len(A[0])
+    while True:
+        yield A[row][col]
+        if row == h-1 and col == w-1:
+            break
+        if row == 0:
+            if forwards:
+                col+=1
+                forwards = False
+                down = True
+            else:
+                row+=1
+                col-=1
+                forwards = True
+        elif col == 0 and row != h-1:
+            if down:
+                row += 1
+                down = False
+            else:
+                row -= 1
+                col += 1
+        elif row == h - 1:
+            if forwards:
+                col+=1
+                forwards = False
+            else:
+                row-=1
+                col+=1
+                forwards = True
+        elif col == w - 1:
+            if not down:
+                down = True
+                row += 1
+            else:
+                row+=1
+                col-=1
+        else:
+            if down:
+                row +=1
+                col -=1
+            else:
+                row -=1
+                col +=1
+                
+   
+
+def test_zigzag():
+     TA = [[(j,i) for i in range(8)] for j in range(8)] 
+     repr(TA)
+     g = zigzag(TA)
+     for _ in range(8*8):
+         print(next(g))
+
+def rle0(g):
+    while True:
+        count = 0
+        num = next(g)
+        while num == 0:
+            count+=1
+            num = next(g)
+        yield (count, num)
+    
+                   
+                
+                
+        
+            
+         
+        
+    
 
 
 
